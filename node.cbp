@@ -86,9 +86,6 @@
          </MakeCommands>
       </Target>
       </Build>
-      <Unit filename="/home/dilin/fyp/Node-Simulation/main.cpp">
-         <Option target="node"/>
-      </Unit>
       <Unit filename="/home/dilin/fyp/Node-Simulation/src/MyTypes.h">
          <Option target="node"/>
       </Unit>
@@ -96,6 +93,9 @@
          <Option target="node"/>
       </Unit>
       <Unit filename="/home/dilin/fyp/Node-Simulation/src/NodeClient.h">
+         <Option target="node"/>
+      </Unit>
+      <Unit filename="/home/dilin/fyp/Node-Simulation/src/main.cpp">
          <Option target="node"/>
       </Unit>
       <Unit filename="/home/dilin/fyp/Node-Simulation/CMakeLists.txt">

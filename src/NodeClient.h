@@ -6,10 +6,10 @@
 #define NODE_NODECLIENT_HPP
 
 #include<opencv2/opencv.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/write.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <array>
 #include <string>
 #include <iostream>
@@ -19,7 +19,7 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 
 
-class NodeClient
+class NodeClient: public boost::enable_shared_from_this<NodeClient>
 {
 public:
     NodeClient();

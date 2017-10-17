@@ -10,7 +10,10 @@ void NodeClient::read_handler(const boost::system::error_code &ec,
     if (!ec)
     {
         std::cout.write(readBuffer.data(), bytes_transferred);
-        tcp_socket.async_read_some(buffer(readBuffer), read_handler);
+        tcp_socket.async_read_some(buffer(readBuffer),
+                                   bind(&NodeClient::read_handler, shared_from_this(),
+                                               placeholders::error,
+                                               boost::asio::placeholders::bytes_transferred));
     }
 }
 
@@ -21,7 +24,10 @@ void NodeClient::connect_handler(const boost::system::error_code &ec)
         std::string r =
                 "Node-" + std::to_string(clientID);
         write(tcp_socket, buffer(r));
-        tcp_socket.async_read_some(buffer(readBuffer), read_handler);
+        tcp_socket.async_read_some(buffer(readBuffer),
+                                   bind(&NodeClient::read_handler, shared_from_this(),
+                                        placeholders::error,
+                                        boost::asio::placeholders::bytes_transferred));
     }
 }
 
@@ -29,7 +35,10 @@ void NodeClient::resolve_handler(const boost::system::error_code &ec,
                      tcp::resolver::iterator it)
 {
     if (!ec)
-        tcp_socket.async_connect(*it, connect_handler);
+        tcp_socket.async_connect(*it,
+                                 bind(&NodeClient::connect_handler, shared_from_this(),
+                                      placeholders::error,
+                                      boost::asio::placeholders::bytes_transferred));
 }
 
 NodeClient::NodeClient(uint8_t id) :
@@ -47,7 +56,10 @@ NodeClient(0)
 void NodeClient::connect(std::string ip, int port)
 {
     tcp::resolver::query q(ip,std::to_string(port));
-    resolv.async_resolve(q,resolve_handler);
+    resolv.async_resolve(q,
+                         bind(&NodeClient::resolve_handler, shared_from_this(),
+                              placeholders::error,
+                              boost::asio::placeholders::bytes_transferred));
     ioservice.run();
 }
 
@@ -99,7 +111,10 @@ void NodeClient::publish(cv::Mat binMask)
     }
     assert(byteCount==N);
     getBitBufferFromMat(binMask,bytes);
-    async_write(tcp_socket,buffer(bytes,byteCount),write_handler);
+    async_write(tcp_socket,buffer(bytes,byteCount),
+                bind(&NodeClient::write_handler, shared_from_this(),
+                     placeholders::error,
+                     boost::asio::placeholders::bytes_transferred));
 }
 
 void NodeClient::write_handler(const boost::system::error_code &error, std::size_t bytes_transferred)
