@@ -8,7 +8,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS})
 include_directories( ${Boost_INCLUDE_DIR})
 
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES src/main.cpp src/MyTypes.h src/NodeClient.cpp src/NodeClient.h)
 add_executable(node ${SOURCE_FILES})
 
 target_link_libraries( node ${OpenCV_LIBS} ${Boost_LIBRARIES} -lpthread )

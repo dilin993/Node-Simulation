@@ -9,15 +9,35 @@ using namespace cv;
 using boost::asio::ip::tcp;
 
 
+#define WIDTH 320
+#define HEIGHT 240
+
+const char *VIDEO_CAPTURE = "Video Capture";
+const char *BINARY_MASK = "Binary Mask";
+//const char *BINARY_MASK_R = "Binary Mask Recieved";
 
 void backgroundSubstraction(Mat &frame0, Mat &frame1, Mat &frame2, Mat &bgModel, Mat &mask, double TH=15)
 {
     Mat frame0g,frame1g,frame2g;
 
+    // resize
+    if(frame0.cols!=HEIGHT || frame0.rows!=HEIGHT)
+    {
+        resize(frame0,frame0g,Size(WIDTH,HEIGHT));
+        resize(frame1,frame1g,Size(WIDTH,HEIGHT));
+        resize(frame2,frame2g,Size(WIDTH,HEIGHT));
+    }
+    else
+    {
+        frame0g = frame0.clone();
+        frame1g = frame1.clone();
+        frame2g = frame2.clone();
+    }
+
     // convert frames to gray
-    cvtColor(frame0,frame0g,COLOR_BGR2GRAY);
-    cvtColor(frame1,frame1g,COLOR_BGR2GRAY);
-    cvtColor(frame2,frame2g,COLOR_BGR2GRAY);
+    cvtColor(frame0g,frame0g,COLOR_BGR2GRAY);
+    cvtColor(frame1g,frame1g,COLOR_BGR2GRAY);
+    cvtColor(frame2g,frame2g,COLOR_BGR2GRAY);
 
     bgModel = 0.5*frame0g + 0.3*frame1g + 0.2*frame2g;
 
@@ -100,6 +120,12 @@ Mat getMatFromBitBuffer(unsigned char *buffer)
     return binMask;
 }
 
+void handle_write(const boost::system::error_code& error,
+                  size_t bytes_transferred)
+{
+    cout << bytes_transferred << " bytes written.\t code: " << boost::system::system_error(error).what();
+}
+
 int main()
 {
     try
@@ -108,7 +134,7 @@ int main()
         boost::asio::io_service io_service;
         tcp::resolver resolver(io_service);
         //tcp::resolver::query query(argv[1], "daytime");
-        tcp::resolver::query query("localhost", "8080");
+        tcp::resolver::query query("192.168.1.7", "8080");
         tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         tcp::resolver::iterator end;
         tcp::socket socket(io_service);
@@ -128,13 +154,13 @@ int main()
 
         VideoCapture videoCap(0); // open web cam for input
 
+        videoCap.set(CAP_PROP_FRAME_WIDTH,320);
+        videoCap.set(CAP_PROP_FRAME_WIDTH,240);
         const int FPS = (int)videoCap.get(CAP_PROP_FPS);
 
         Mat frame0,frame1,frame2,bgModel,mask;
 
-        const char *VIDEO_CAPTURE = "Video Capture";
-        const char *BINARY_MASK = "Binary Mask";
-        const char *BINARY_MASK_R = "Binary Mask Recieved";
+
         namedWindow(VIDEO_CAPTURE, CV_WINDOW_AUTOSIZE);
         namedWindow(BINARY_MASK, CV_WINDOW_AUTOSIZE);
 //        namedWindow(BINARY_MASK_R, CV_WINDOW_AUTOSIZE);
@@ -156,7 +182,8 @@ int main()
             buffer = getBitBufferFromMat(mask);
 
             int N = (mask.rows * mask.cols)/8+5;
-            socket.write_some(boost::asio::buffer(buffer,N), error);
+//            socket.write_some(boost::asio::buffer(buffer,N), error);
+            socket.async_write_some(boost::asio::buffer(buffer,N),handle_write);
             if (error == boost::asio::error::eof)
                 break; // Connection closed cleanly by peer.
             else if (error)
