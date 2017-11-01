@@ -1,6 +1,7 @@
 #include "MyTypes.h"
 #include "NodeClient.h"
 #include "BGSDetector.h"
+#include<chrono>
 
 
 
@@ -74,6 +75,8 @@ int main()
         
             std::vector<std::vector<cv::Point> > contours;
         
+            auto start = std::chrono::system_clock::now();
+
             // contour detection
             cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
         
@@ -119,6 +122,14 @@ int main()
                 }
         
             }
+
+            auto end = std::chrono::system_clock::now();
+
+            auto elapsed =
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+            
+            std::cout << "time for cont det: " << elapsed.count() << '\n';
+
             client.sendBinMask(mask);
 
 
