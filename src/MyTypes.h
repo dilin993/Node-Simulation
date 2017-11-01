@@ -17,8 +17,8 @@ using boost::asio::ip::tcp;
 
 typedef unsigned char uchar;
 
-#define WIDTH 360
-#define HEIGHT 288
+#define WIDTH 640
+#define HEIGHT 480
 #define BUF_SIZE(W,H) (W*H)/8+5
 #define N BUF_SIZE(WIDTH,HEIGHT)
 //#define FPS 30

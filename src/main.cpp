@@ -25,22 +25,22 @@ int main()
 {
     try
     {
-        NodeClient client("localhost",8080);
+        NodeClient client("10.0.0.200",8080);
         client.connect();
 
         std::cout << "-------------Node Simulation-------------" << std::endl << std::endl;
         std::cout << "Connection established!" << std::endl;
 
-        VideoCapture videoCap("/home/dilin/fyp/people_videos/terrace1-c0.avi"); // open web cam for input
+        VideoCapture videoCap(0); // open web cam for input
 
-        const int FPS = (int)videoCap.get(CAP_PROP_FPS);
+        const int FPS = 30;
 
         Mat frame0,frame1,frame2,bgModel,mask;
 
-        const char *VIDEO_CAPTURE = "Video Capture";
-        const char *BINARY_MASK = "Binary Mask";
-        namedWindow(VIDEO_CAPTURE, CV_WINDOW_AUTOSIZE);
-        namedWindow(BINARY_MASK, CV_WINDOW_AUTOSIZE);
+        //const char *VIDEO_CAPTURE = "Video Capture";
+        //const char *BINARY_MASK = "Binary Mask";
+        //namedWindow(VIDEO_CAPTURE, CV_WINDOW_AUTOSIZE);
+        //namedWindow(BINARY_MASK, CV_WINDOW_AUTOSIZE);
 
 
         videoCap.read(frame0);
@@ -55,14 +55,14 @@ int main()
             client.sendBinMask(mask);
 
 
-            imshow(VIDEO_CAPTURE,frame0);
-            imshow(BINARY_MASK,mask);
+          //  imshow(VIDEO_CAPTURE,frame0);
+         //   imshow(BINARY_MASK,mask);
 
             frame2 = frame1.clone();
             frame1 = frame0.clone();
             videoCap.read(frame0);
 
-            waitKey(1000/FPS);
+           // waitKey(1000/FPS);
         }
 
 
