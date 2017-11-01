@@ -31,7 +31,7 @@ int main()
         std::cout << "-------------Node Simulation-------------" << std::endl << std::endl;
         std::cout << "Connection established!" << std::endl;
 
-        VideoCapture videoCap("/home/dilin/fyp/people_videos/terrace1-c0.avi"); // open web cam for input
+        VideoCapture videoCap(1); // open web cam for input
 
         const int FPS = (int)videoCap.get(CAP_PROP_FPS);
 
