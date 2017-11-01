@@ -140,7 +140,7 @@ int main()
             auto elapsed =
                 std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-            std::cout << "total time " << elapsed.count() << ' ms\n';
+            std::cout << "total time " << elapsed.count() << " ms\n";
             // waitKey(1000/FPS);
         }
 
