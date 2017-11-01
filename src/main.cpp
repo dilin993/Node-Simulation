@@ -1,5 +1,6 @@
 #include "MyTypes.h"
 #include "NodeClient.h"
+#include "BGSDetector.h"
 
 
 
@@ -52,6 +53,72 @@ int main()
         {
 
             backgroundSubstraction(frame0,frame1,frame2,bgModel,mask,15.0);
+
+            std::vector<cv::Rect> detections,found;
+        
+            // cv::Mat structuringElement3x3 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+            cv::Mat structuringElement5x5 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+            // cv::Mat structuringElement7x7 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7));
+            // cv::Mat structuringElement9x9 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(9, 9));
+        
+            /*
+            cv::dilate(imgThresh, imgThresh, structuringElement7x7);
+            cv::erode(imgThresh, imgThresh, structuringElement3x3);
+            */
+        
+            cv::dilate(mask, mask, structuringElement5x5);
+            cv::dilate(mask, mask, structuringElement5x5);
+            cv::erode(mask, mask, structuringElement5x5);
+        
+        
+        
+            std::vector<std::vector<cv::Point> > contours;
+        
+            // contour detection
+            cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        
+            std::vector<std::vector<cv::Point> > convexHulls(contours.size());
+        
+            for (unsigned int i = 0; i < contours.size(); i++)
+            {
+                cv::convexHull(contours[i], convexHulls[i]);
+            }
+        
+            // convex hulls
+            for (auto &convexHull : convexHulls) {
+                Blob possibleBlob(convexHull);
+        
+                if (possibleBlob.currentBoundingRect.area() > 100 &&
+                    possibleBlob.dblCurrentAspectRatio >= 0.2 &&
+                    possibleBlob.dblCurrentAspectRatio <= 1.25 &&
+                    possibleBlob.currentBoundingRect.width > 20 &&
+                    possibleBlob.currentBoundingRect.height > 20 &&
+                    possibleBlob.dblCurrentDiagonalSize > 30.0 &&
+                    (cv::contourArea(possibleBlob.currentContour) /
+                     (double)possibleBlob.currentBoundingRect.area()) > 0.40)
+                {
+                    found.push_back(possibleBlob.currentBoundingRect);
+                }
+            }
+        
+            size_t i, j;
+        
+            for (i=0; i<found.size(); i++)
+            {
+                cv::Rect r = found[i];
+                for (j=0; j<found.size(); j++)
+                    if (j!=i && (r & found[j])==r)
+                        break;
+                if (j==found.size())
+                {
+                    r.x += cvRound(r.width*0.1);
+                    r.width = cvRound(r.width*0.8);
+                    r.y += cvRound(r.height*0.07);
+                    r.height = cvRound(r.height*0.8);
+                    detections.push_back(r);
+                }
+        
+            }
             client.sendBinMask(mask);
 
 
